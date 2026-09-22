@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- macOS 26.4+
+- macOS 26.0+ (run) / 26.4+ recommended for building
 - Xcode 26.4+ (`xcode-select --install` for command line tools)
 - [uv](https://docs.astral.sh/uv/) to generate test fixtures
 
