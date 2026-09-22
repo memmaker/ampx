@@ -22,7 +22,7 @@ A native macOS music player with the Winamp workflow (compact player, equalizer,
 
 ## Quick start
 
-Requires macOS 26.4+ and Xcode 26.4+.
+Requires macOS 26.0+ to run. Building needs Xcode 26.4+.
 
 ```bash
 ./build.sh --run
