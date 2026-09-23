@@ -58,6 +58,20 @@ final class AmpXButton: AmpXControlView {
         didSet { needsDisplay = true }
     }
 
+    /// Draws the unlit lamp as a grey square in the lit lamp's exact footprint instead of a round dome,
+    /// so toggling only changes the lamp's color.
+    var usesSquareInactiveLamp = false {
+        didSet { needsDisplay = true }
+    }
+
+    /// Glyph ink while active; defaults to `faceGreen` (`green` on the pressed face).
+    var activeIconColor: NSColor? {
+        didSet { needsDisplay = true }
+    }
+
+    /// Lit-lamp green; also the ink for active glyphs that should read like a lit lamp.
+    static let lampGreen = NSColor(srgbRed: 0.28, green: 0.94, blue: 0.20, alpha: 1)
+
     /// Display-only active state for deterministic reference presentation.
     var displayActiveOverride: Bool? {
         didSet { needsDisplay = true }
@@ -150,7 +164,7 @@ final class AmpXButton: AmpXControlView {
 
         if let icon {
             // Bright green reads on the darker pressed face; light steel needs the deep variant.
-            let activeTint = faceStyle == .pressed ? skin.green : skin.faceGreen
+            let activeTint = self.activeIconColor ?? (faceStyle == .pressed ? skin.green : skin.faceGreen)
             let tint = self.pressedAccent(for: self.iconColor, faceStyle: faceStyle)
                 ?? (self.displaysActive ? activeTint : self.inkColor)
             icon.draw(in: self.resolvedIconRect, context: context, skin: skin, color: isEnabled ? tint : self.dimInkColor)
@@ -203,7 +217,11 @@ final class AmpXButton: AmpXControlView {
         }
 
         guard self.displaysActive else {
-            self.drawInactiveLamp(in: lamp, context: context)
+            if self.usesSquareInactiveLamp {
+                self.drawInactiveSquareLamp(in: lamp, context: context)
+            } else {
+                self.drawInactiveLamp(in: lamp, context: context)
+            }
             return
         }
         context.setFillColor(NSColor(srgbRed: 0.02, green: 0.05, blue: 0.04, alpha: 1).cgColor)
@@ -212,7 +230,7 @@ final class AmpXButton: AmpXControlView {
         if self.displaysActive {
             context.setFillColor(NSColor(srgbRed: 0.10, green: 0.78, blue: 0.08, alpha: 1).cgColor)
             context.fill(inner)
-            context.setFillColor(NSColor(srgbRed: 0.28, green: 0.94, blue: 0.20, alpha: 1).cgColor)
+            context.setFillColor(Self.lampGreen.cgColor)
             context.fill(inner.insetBy(dx: 0.5, dy: 0.5))
             context.setFillColor(NSColor(srgbRed: 0.62, green: 1, blue: 0.52, alpha: 1).cgColor)
             context.fill(CGRect(x: inner.minX + 0.5, y: inner.minY + 0.5, width: inner.width - 1, height: 0.5))
@@ -244,6 +262,32 @@ final class AmpXButton: AmpXControlView {
                 gradient,
                 start: CGPoint(x: dome.minX, y: dome.minY),
                 end: CGPoint(x: dome.maxX, y: dome.maxY),
+                options: []
+            )
+        }
+        context.restoreGState()
+    }
+
+    /// Unlit square lamp: same dark rim and footprint as the lit lamp, filled with the dome's steel grey.
+    private func drawInactiveSquareLamp(in lamp: CGRect, context: CGContext) {
+        context.setFillColor(NSColor(srgbRed: 8 / 255, green: 15 / 255, blue: 28 / 255, alpha: 1).cgColor)
+        context.fill(lamp)
+        let inner = lamp.insetBy(dx: 1, dy: 1)
+        context.saveGState()
+        context.clip(to: inner)
+        if let gradient = CGGradient(
+            colorsSpace: CGColorSpace(name: CGColorSpace.sRGB),
+            colors: [
+                NSColor(srgbRed: 104 / 255, green: 117 / 255, blue: 139 / 255, alpha: 1).cgColor,
+                NSColor(srgbRed: 150 / 255, green: 163 / 255, blue: 183 / 255, alpha: 1).cgColor,
+                NSColor(srgbRed: 170 / 255, green: 183 / 255, blue: 200 / 255, alpha: 1).cgColor,
+            ] as CFArray,
+            locations: [0, 0.6, 1]
+        ) {
+            context.drawLinearGradient(
+                gradient,
+                start: CGPoint(x: inner.minX, y: inner.minY),
+                end: CGPoint(x: inner.maxX, y: inner.maxY),
                 options: []
             )
         }

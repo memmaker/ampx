@@ -188,6 +188,7 @@ final class PlayerModuleContent: AmpXModuleContent {
                 )
                 button.showsActiveIndicator = true
                 button.indicatorRect = AmpXMetrics.playerShuffleIndicator
+                button.usesSquareInactiveLamp = true
                 button.accessibilityTitle = "Shuffle"
                 button.action = { [weak self] in
                     guard let self else { return }
@@ -205,6 +206,10 @@ final class PlayerModuleContent: AmpXModuleContent {
             } else if let icon = transportIcons[index] {
                 button.icon = icon
                 button.showsActiveFace = icon == .play
+                if icon == .repeat {
+                    // Same green as the lit lamps (SHUFFLE, EQ, PL) so the active state reads clearly
+                    button.activeIconColor = AmpXButton.lampGreen
+                }
                 button.accessibilityTitle = self.transportLabel(for: icon)
                 button.action = self.transportAction(for: icon)
             }
