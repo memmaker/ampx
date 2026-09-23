@@ -58,12 +58,6 @@ final class AmpXButton: AmpXControlView {
         didSet { needsDisplay = true }
     }
 
-    /// Draws the unlit lamp as a grey square in the lit lamp's exact footprint instead of a round dome,
-    /// so toggling only changes the lamp's color.
-    var usesSquareInactiveLamp = false {
-        didSet { needsDisplay = true }
-    }
-
     /// Glyph ink while active; defaults to `faceGreen` (`green` on the pressed face).
     var activeIconColor: NSColor? {
         didSet { needsDisplay = true }
@@ -206,70 +200,28 @@ final class AmpXButton: AmpXControlView {
     private func drawIndicator(in context: CGContext) {
         guard let lamp = indicatorRect else {
             let indicator = CGRect(x: bounds.maxX - 7, y: bounds.midY - 2, width: 4, height: 4)
-            if self.displaysActive {
-                context.setFillColor(skin.green.cgColor)
-                context.fill(indicator)
-            } else {
-                context.setFillColor(skin.textDim.cgColor)
-                context.fillEllipse(in: indicator)
-            }
+            context.setFillColor((self.displaysActive ? skin.green : skin.textDim).cgColor)
+            context.fill(indicator)
             return
         }
 
         guard self.displaysActive else {
-            if self.usesSquareInactiveLamp {
-                self.drawInactiveSquareLamp(in: lamp, context: context)
-            } else {
-                self.drawInactiveLamp(in: lamp, context: context)
-            }
+            self.drawInactiveLamp(in: lamp, context: context)
             return
         }
         context.setFillColor(NSColor(srgbRed: 0.02, green: 0.05, blue: 0.04, alpha: 1).cgColor)
         context.fill(lamp)
         let inner = lamp.insetBy(dx: 1, dy: 1)
-        if self.displaysActive {
-            context.setFillColor(NSColor(srgbRed: 0.10, green: 0.78, blue: 0.08, alpha: 1).cgColor)
-            context.fill(inner)
-            context.setFillColor(Self.lampGreen.cgColor)
-            context.fill(inner.insetBy(dx: 0.5, dy: 0.5))
-            context.setFillColor(NSColor(srgbRed: 0.62, green: 1, blue: 0.52, alpha: 1).cgColor)
-            context.fill(CGRect(x: inner.minX + 0.5, y: inner.minY + 0.5, width: inner.width - 1, height: 0.5))
-        } else {
-            context.setFillColor(NSColor(srgbRed: 0.17, green: 0.2, blue: 0.25, alpha: 1).cgColor)
-            context.fill(inner)
-        }
+        context.setFillColor(NSColor(srgbRed: 0.10, green: 0.78, blue: 0.08, alpha: 1).cgColor)
+        context.fill(inner)
+        context.setFillColor(Self.lampGreen.cgColor)
+        context.fill(inner.insetBy(dx: 0.5, dy: 0.5))
+        context.setFillColor(NSColor(srgbRed: 0.62, green: 1, blue: 0.52, alpha: 1).cgColor)
+        context.fill(CGRect(x: inner.minX + 0.5, y: inner.minY + 0.5, width: inner.width - 1, height: 0.5))
     }
 
-    /// Unlit lamp: a round steel-gray dome (buttons without `usesSquareInactiveLamp`).
+    /// Unlit lamp: a grey square with the lit lamp's dark rim and footprint, so toggling only changes color.
     private func drawInactiveLamp(in lamp: CGRect, context: CGContext) {
-        func color(_ r: CGFloat, _ g: CGFloat, _ b: CGFloat) -> CGColor {
-            NSColor(srgbRed: r / 255, green: g / 255, blue: b / 255, alpha: 1).cgColor
-        }
-        context.setFillColor(color(62, 76, 100))
-        context.fillEllipse(in: lamp.offsetBy(dx: 0.5, dy: 0.75))
-        context.setFillColor(color(8, 15, 28))
-        context.fillEllipse(in: lamp)
-        let dome = lamp.insetBy(dx: 0.75, dy: 0.75)
-        context.saveGState()
-        context.addEllipse(in: dome)
-        context.clip()
-        if let gradient = CGGradient(
-            colorsSpace: CGColorSpace(name: CGColorSpace.sRGB),
-            colors: [color(104, 117, 139), color(150, 163, 183), color(170, 183, 200)] as CFArray,
-            locations: [0, 0.6, 1]
-        ) {
-            context.drawLinearGradient(
-                gradient,
-                start: CGPoint(x: dome.minX, y: dome.minY),
-                end: CGPoint(x: dome.maxX, y: dome.maxY),
-                options: []
-            )
-        }
-        context.restoreGState()
-    }
-
-    /// Unlit square lamp: same dark rim and footprint as the lit lamp, filled with the dome's steel grey.
-    private func drawInactiveSquareLamp(in lamp: CGRect, context: CGContext) {
         context.setFillColor(NSColor(srgbRed: 8 / 255, green: 15 / 255, blue: 28 / 255, alpha: 1).cgColor)
         context.fill(lamp)
         let inner = lamp.insetBy(dx: 1, dy: 1)

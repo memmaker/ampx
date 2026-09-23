@@ -191,7 +191,6 @@ final class PlayerModuleContent: AmpXModuleContent {
                 )
                 button.showsActiveIndicator = true
                 button.indicatorRect = AmpXMetrics.playerShuffleIndicator
-                button.usesSquareInactiveLamp = true
                 button.accessibilityTitle = "Shuffle"
                 button.action = { [weak self] in
                     guard let self else { return }
