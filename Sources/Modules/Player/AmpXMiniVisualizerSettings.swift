@@ -70,7 +70,7 @@ struct AmpXMiniVisualizerSettingsStore {
 
     private let defaults: UserDefaults
 
-    init(defaults: UserDefaults = .standard) {
+    init(defaults: UserDefaults = AmpXUserDefaults.app) {
         self.defaults = defaults
     }
 

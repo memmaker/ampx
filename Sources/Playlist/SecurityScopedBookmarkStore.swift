@@ -22,7 +22,7 @@ final class SecurityScopedBookmarkStore: @unchecked Sendable {
     private let userDefaults: UserDefaults
 
     init(
-        userDefaults: UserDefaults = .standard,
+        userDefaults: UserDefaults = AmpXUserDefaults.app,
         bookmarksKey: String = "AmpXSecurityScopedBookmarks"
     ) {
         self.userDefaults = userDefaults

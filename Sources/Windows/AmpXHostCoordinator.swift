@@ -60,7 +60,7 @@ final class AmpXHostCoordinator: AmpXEntheaTheaterHandling {
         self.screen = resolvedScreen
         self.audioPlayer = audioPlayer
         self.playlistManager = playlistManager
-        self.layoutStore = layoutStore ?? AmpXLayoutStore(defaults: .standard, screen: resolvedScreen)
+        self.layoutStore = layoutStore ?? AmpXLayoutStore(defaults: AmpXUserDefaults.app, screen: resolvedScreen)
 
         let saved = self.layoutStore.load(screen: resolvedScreen)
         self.stackFrame = saved.stackFrame

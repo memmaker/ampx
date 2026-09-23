@@ -69,7 +69,7 @@ final class EQSettingsStore {
     private let userDefaults: UserDefaults
 
     init(
-        userDefaults: UserDefaults = .standard,
+        userDefaults: UserDefaults = AmpXUserDefaults.app,
         settingsKey: String = "AmpXEQSettings",
         presetsKey: String = "AmpXEQPresets"
     ) {

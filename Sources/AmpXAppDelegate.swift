@@ -26,7 +26,7 @@ final class AmpXAppDelegate: NSObject, NSApplicationDelegate {
 
         let audioPlayer = AudioPlayer.shared
         let playlistManager = PlaylistManager.shared
-        let layoutStore = AmpXLayoutStore(defaults: .standard)
+        let layoutStore = AmpXLayoutStore(defaults: AmpXUserDefaults.app)
         let saved = layoutStore.loadForLaunch()
         let hosts = AmpXHostCoordinator(
             state: saved.state,
