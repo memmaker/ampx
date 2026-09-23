@@ -56,6 +56,7 @@ final class EqualizerModuleContent: AmpXModuleContent {
         }
 
         self.configureToggle(self.autoToggle, label: "AUTO", indicator: AmpXMetrics.eqAutoIndicator, labelInk: AmpXMetrics.eqAutoLabelInk)
+        self.autoToggle.usesSquareInactiveLamp = true
         self.autoToggle.accessibilityTitle = "Equalizer auto"
         self.autoToggle.action = { [weak audioPlayer] in
             guard let audioPlayer else { return }

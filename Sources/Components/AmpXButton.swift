@@ -240,7 +240,7 @@ final class AmpXButton: AmpXControlView {
         }
     }
 
-    /// Unlit lamp: a round steel-gray dome, as the reference AUTO indicator.
+    /// Unlit lamp: a round steel-gray dome (buttons without `usesSquareInactiveLamp`).
     private func drawInactiveLamp(in lamp: CGRect, context: CGContext) {
         func color(_ r: CGFloat, _ g: CGFloat, _ b: CGFloat) -> CGColor {
             NSColor(srgbRed: r / 255, green: g / 255, blue: b / 255, alpha: 1).cgColor
