@@ -151,7 +151,8 @@ final class AmpXButton: AmpXControlView {
         if let icon {
             // Bright green reads on the darker pressed face; light steel needs the deep variant.
             let activeTint = faceStyle == .pressed ? skin.green : skin.faceGreen
-            let tint = self.iconColor ?? (self.displaysActive ? activeTint : self.inkColor)
+            let tint = self.pressedAccent(for: self.iconColor, faceStyle: faceStyle)
+                ?? (self.displaysActive ? activeTint : self.inkColor)
             icon.draw(in: self.resolvedIconRect, context: context, skin: skin, color: isEnabled ? tint : self.dimInkColor)
         }
 
@@ -160,6 +161,15 @@ final class AmpXButton: AmpXControlView {
         }
 
         drawFocusRing(in: context, backingScale: backingScale)
+    }
+
+    /// Deep accent inks (`faceGreen`, `faceAmber`) are tuned for light steel and drop to ~2:1 on the
+    /// darker pressed face; swap them for their bright counterparts there (≥3:1), like active glyphs.
+    func pressedAccent(for color: NSColor?, faceStyle: AmpXFaceStyle) -> NSColor? {
+        guard faceStyle == .pressed, let color else { return color }
+        if color == skin.faceGreen { return skin.green }
+        if color == skin.faceAmber { return skin.yellow }
+        return color
     }
 
     private func drawLabel(in context: CGContext) {

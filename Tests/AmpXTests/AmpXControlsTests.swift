@@ -63,6 +63,19 @@ final class AmpXControlsTests: XCTestCase {
     }
 
     @MainActor
+    func testDeepAccentGlyphsBrightenOnPressedFace() {
+        let skin = ClassicModernSkin()
+        let button = AmpXButton(skin: skin)
+
+        // Deep inks read on light steel but not on the darker pressed face
+        XCTAssertEqual(button.pressedAccent(for: skin.faceGreen, faceStyle: .normal), skin.faceGreen)
+        XCTAssertEqual(button.pressedAccent(for: skin.faceGreen, faceStyle: .pressed), skin.green)
+        XCTAssertEqual(button.pressedAccent(for: skin.faceAmber, faceStyle: .pressed), skin.yellow)
+        XCTAssertEqual(button.pressedAccent(for: skin.faceInk, faceStyle: .pressed), skin.faceInk)
+        XCTAssertNil(button.pressedAccent(for: nil, faceStyle: .pressed))
+    }
+
+    @MainActor
     func testDisabledButtonDoesNotActivate() throws {
         let skin = ClassicModernSkin()
         let button = AmpXButton(skin: skin)
