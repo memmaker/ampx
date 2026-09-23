@@ -69,7 +69,7 @@ final class EqualizerModuleContent: AmpXModuleContent {
             "PRESETS", size: 12.5, inkX: AmpXMetrics.eqPresetsLabelInk.x, baseline: AmpXMetrics.eqPresetsLabelInk.y, skin: skin
         )
         self.presetsButton.icon = .dropdown
-        self.presetsButton.iconColor = skin.text
+        self.presetsButton.iconColor = skin.faceInk
         self.presetsButton.iconRect = AmpXMetrics.eqPresetsTriangle
         self.presetsButton.accessibilityTitle = "Equalizer presets"
         self.presetsButton.action = { [weak self] in
@@ -278,11 +278,12 @@ final class EqualizerModuleContent: AmpXModuleContent {
 
     private func drawCurveGrid(in context: CGContext) {
         let frame = AmpXMetrics.eqCurveFrame
-        let knots = EQCurveView.knotPoints(
+        // A grid line under each band knot, plus the graph's two edges.
+        let bandKnots = EQCurveView.knotPoints(
             bandValues: Array(repeating: 0, count: AmpXEQBands.bandCount),
-            preampValue: 0,
             size: frame.size
         )
+        let knots = [CGPoint(x: 0, y: 0)] + bandKnots + [CGPoint(x: frame.width, y: 0)]
         let height = AmpXMetrics.eqGridMaxY - AmpXMetrics.eqGridMinY
         // Dark, mid and light half-point columns sampled across a reference grid line.
         let columns: [(offset: CGFloat, color: NSColor)] = [
