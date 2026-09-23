@@ -56,7 +56,6 @@ final class EqualizerModuleContent: AmpXModuleContent {
         }
 
         self.configureToggle(self.autoToggle, label: "AUTO", indicator: AmpXMetrics.eqAutoIndicator, labelInk: AmpXMetrics.eqAutoLabelInk)
-        self.autoToggle.usesSquareInactiveLamp = true
         self.autoToggle.accessibilityTitle = "Equalizer auto"
         self.autoToggle.action = { [weak audioPlayer] in
             guard let audioPlayer else { return }
@@ -105,6 +104,8 @@ final class EqualizerModuleContent: AmpXModuleContent {
         button.labelBaselineOrigin = Self.labelOrigin(label, size: 13, inkX: labelInk.x, baseline: labelInk.y, skin: skin)
         button.showsActiveIndicator = true
         button.indicatorRect = indicator
+        // Unlit lamp is a grey square in the lit lamp's footprint, so toggling only changes color
+        button.usesSquareInactiveLamp = true
     }
 
     private func configureLevelSlider(_ slider: AmpXSlider, title: String) {
