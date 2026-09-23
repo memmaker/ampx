@@ -58,7 +58,11 @@ final class AmpXCompactHostTests: XCTestCase {
         coordinator.showStack()
         await self.fulfillment(of: [restored], timeout: 3)
         XCTAssertFalse(window.isMiniaturized)
+        var terminated = false
+        coordinator.terminateApplication = { terminated = true }
         compact.closeButton.action?()
+        XCTAssertTrue(terminated, "The compact player's X quits AmpX like the full player's")
+        coordinator.closeStack()
         XCTAssertFalse(window.isVisible)
         coordinator.showStack()
         XCTAssertTrue(window.isVisible)

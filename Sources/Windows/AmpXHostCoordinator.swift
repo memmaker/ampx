@@ -31,6 +31,8 @@ final class AmpXHostCoordinator: AmpXEntheaTheaterHandling {
     )
 
     private(set) var isStackVisible = false
+    /// Quits the app; replaceable in tests. `applicationWillTerminate` flushes layout persistence.
+    var terminateApplication: () -> Void = { NSApp.terminate(nil) }
 
     var stackWindow: NSWindow? {
         self.stackWindowController?.window
@@ -305,8 +307,9 @@ final class AmpXHostCoordinator: AmpXEntheaTheaterHandling {
         }
     }
 
+    /// The player's title-bar X quits AmpX, as in Winamp. (Close Window / ⌘W still only hides the stack.)
     func handlePlayerHeaderClose() {
-        self.closeStack()
+        self.terminateApplication()
     }
 
     func handleModuleHeaderClose(_ id: AmpXModuleID) {

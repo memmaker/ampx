@@ -108,6 +108,17 @@ final class AmpXHostCoordinatorTests: XCTestCase {
         XCTAssertTrue(loaded.state.collapsed.contains(.equalizer))
     }
 
+    func testPlayerHeaderCloseQuitsTheApp() {
+        let coordinator = self.makeCoordinator()
+        coordinator.showStack()
+        var terminated = false
+        coordinator.terminateApplication = { terminated = true }
+
+        coordinator.handlePlayerHeaderClose()
+
+        XCTAssertTrue(terminated, "The player's X must quit AmpX, not just hide the window")
+    }
+
     func testCloseStackHidesWindowButRetainsControllerAndState() {
         let coordinator = self.makeCoordinator()
         coordinator.showStack()
