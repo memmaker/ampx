@@ -373,10 +373,53 @@ final class AudioPlayerTests: XCTestCase {
         )
     }
 
-    private static func makeSilentWAVFixture(durationSeconds: Double) throws -> URL {
+    func testPlaybackTimeUsesPlayerSampleRateForHighSampleRateFiles() throws {
+        // 96 kHz files are resampled to the engine's rate; the position must still advance in real time
+        let hiResURL = try Self.makeSilentWAVFixture(durationSeconds: 3.0, sampleRate: 96000)
+        defer { try? FileManager.default.removeItem(at: hiResURL) }
+
+        let track = Track(title: "HiRes", artist: "Test", url: hiResURL)
+        XCTAssertTrue(self.waitForLoad(track))
+        self.player.play()
+        self.waitBriefly(1.0)
+
+        let snapshotExpectation = expectation(description: "hi-res playback time snapshot")
+        let snapshot = SendableBox<TimeInterval?>(nil)
+        self.player.testing_playbackTimeSnapshot { time in
+            snapshot.value = time
+            snapshotExpectation.fulfill()
+        }
+        wait(for: [snapshotExpectation], timeout: 2.0)
+
+        let time = try XCTUnwrap(snapshot.value)
+        XCTAssertGreaterThan(time, 0.7, "Position must advance in real time, not scaled by fileRate/outputRate")
+        XCTAssertLessThan(time, 1.5)
+    }
+
+    func testTrackFinishedFiresOnlyAfterAudioHasPlayed() throws {
+        let url = try Self.makeSilentWAVFixture(durationSeconds: 1.0)
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        let track = Track(title: "One Second", artist: "Test", url: url)
+        XCTAssertTrue(self.waitForLoad(track))
+
+        let finishedExpectation = expectation(description: "track finished")
+        let finishedAt = SendableBox<Date?>(nil)
+        self.player.onTrackFinished = {
+            finishedAt.value = Date()
+            finishedExpectation.fulfill()
+        }
+        let startedAt = Date()
+        self.player.play()
+        wait(for: [finishedExpectation], timeout: 5.0)
+
+        let elapsed = try XCTUnwrap(finishedAt.value).timeIntervalSince(startedAt)
+        XCTAssertGreaterThanOrEqual(elapsed, 0.9, "Auto-advance must not fire before the track's audio has been played")
+    }
+
+    private static func makeSilentWAVFixture(durationSeconds: Double, sampleRate: Double = 44100) throws -> URL {
         let url = FileManager.default.temporaryDirectory
             .appendingPathComponent("winamp-seek-\(UUID().uuidString).wav")
-        let sampleRate = 44100.0
         let frameCount = AVAudioFrameCount(durationSeconds * sampleRate)
         let format = try XCTUnwrap(AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 1))
         let file = try AVAudioFile(forWriting: url, settings: format.settings)

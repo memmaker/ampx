@@ -85,7 +85,8 @@ class AudioPlayer: NSObject, ObservableObject {
     private nonisolated(unsafe) var loadGeneration = 0
     /// Absolute file time at the start of the currently scheduled player segment.
     /// `AVAudioPlayerNode.playerTime.sampleTime` is relative to that segment, so UI
-    /// position is `playbackSegmentStartTime + sampleTime/sampleRate`.
+    /// position is `playbackSegmentStartTime + sampleTime/sampleRate`, using the player's own
+    /// (output) sample rate, which differs from the file's when e.g. a 96 kHz file plays at 44.1 kHz.
     private nonisolated(unsafe) var playbackSegmentStartTime: TimeInterval = 0
     private let audioQueue = DispatchQueue(label: "com.ampx.audio", qos: .userInteractive)
 
@@ -458,7 +459,9 @@ class AudioPlayer: NSObject, ObservableObject {
             self.playbackSegmentStartTime = 0
             let generation = self.playbackGeneration
 
-            player.scheduleFile(file, at: nil) { [weak self] in
+            // .dataPlayedBack: the default (.dataConsumed) fires ~1 s before the audio has been heard,
+            // which made auto-advance cut off the end of every track
+            player.scheduleFile(file, at: nil, completionCallbackType: .dataPlayedBack) { [weak self] _ in
                 self?.runOnMainActor(weak: self) { player in
                     guard generation == player.playbackGeneration else { return }
                     player.handleTrackCompletion()
@@ -621,8 +624,9 @@ class AudioPlayer: NSObject, ObservableObject {
                 file,
                 startingFrame: startFrame,
                 frameCount: AVAudioFrameCount(file.length - startFrame),
-                at: nil
-            ) { [weak self] in
+                at: nil,
+                completionCallbackType: .dataPlayedBack
+            ) { [weak self] _ in
                 self?.runOnMainActor(weak: self) { player in
                     guard generation == player.playbackGeneration else { return }
                     player.handleTrackCompletion()
@@ -891,11 +895,12 @@ class AudioPlayer: NSObject, ObservableObject {
         guard let player = playerNode,
               let lastRenderTime = player.lastRenderTime,
               let playerTime = player.playerTime(forNodeTime: lastRenderTime),
-              let file = audioFile
+              audioFile != nil
         else {
             return nil
         }
-        let sampleRate = file.fileFormat.sampleRate
+        // sampleTime counts in the player's output rate, not the file's
+        let sampleRate = playerTime.sampleRate
         guard sampleRate > 0 else { return nil }
         let relative = Double(playerTime.sampleTime) / sampleRate
         return max(0, self.playbackSegmentStartTime + relative)
