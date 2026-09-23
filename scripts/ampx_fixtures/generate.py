@@ -32,7 +32,7 @@ def write_sample_m3u(path: Path) -> None:
         "relative-track.wav\n"
         "/absolute/track.mp3\n"
         "file:///tmp/absolute.flac\n"
-        "unsupported.ogg\n",
+        "unsupported.wma\n",
         encoding="utf-8",
     )
 

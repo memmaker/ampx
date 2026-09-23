@@ -1,7 +1,8 @@
 import Foundation
 
 enum M3UParser {
-    static let supportedExtensions: Set<String> = ["mp3", "flac", "wav"]
+    /// Formats AVAudioFile decodes natively (Ogg Vorbis/Opus included)
+    static let supportedExtensions: Set<String> = ["mp3", "flac", "wav", "ogg", "oga", "opus"]
 
     static func isSupportedAudioExtension(_ ext: String) -> Bool {
         self.supportedExtensions.contains(ext.lowercased())

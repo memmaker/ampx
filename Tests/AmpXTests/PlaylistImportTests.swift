@@ -50,7 +50,7 @@ final class PlaylistImportTests: XCTestCase {
             alertPresenter: SilentPlaylistAlertPresenter()
         )
 
-        let fileURL = URL(fileURLWithPath: "/tmp/clip.ogg")
+        let fileURL = URL(fileURLWithPath: "/tmp/clip.wma")
         manager.importDroppedURL(fileURL)
 
         XCTAssertTrue(manager.tracks.isEmpty)

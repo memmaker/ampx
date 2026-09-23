@@ -7,7 +7,9 @@ final class M3UParserTests: XCTestCase {
     func testSupportedExtensions() {
         XCTAssertTrue(M3UParser.isSupportedAudioExtension("mp3"))
         XCTAssertTrue(M3UParser.isSupportedAudioExtension("FLAC"))
-        XCTAssertFalse(M3UParser.isSupportedAudioExtension("ogg"))
+        XCTAssertTrue(M3UParser.isSupportedAudioExtension("ogg"))
+        XCTAssertTrue(M3UParser.isSupportedAudioExtension("Opus"))
+        XCTAssertFalse(M3UParser.isSupportedAudioExtension("wma"))
     }
 
     func testParseRelativeAndAbsolutePaths() {
@@ -17,7 +19,7 @@ final class M3UParserTests: XCTestCase {
         songs/one.mp3
         /absolute/two.flac
         file:///var/three.wav
-        video.ogg
+        video.wma
         """
         let urls = M3UParser.parseTrackURLs(from: content, playlistDirectory: self.playlistDir)
         XCTAssertEqual(urls.count, 3)

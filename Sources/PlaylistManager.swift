@@ -2,6 +2,7 @@ import AppKit
 import Combine
 import Foundation
 import os
+import UniformTypeIdentifiers
 
 private let playlistLogger = Logger(subsystem: "com.ampx.macos", category: "Playlist")
 
@@ -657,7 +658,7 @@ class PlaylistManager: ObservableObject {
         panel.allowsMultipleSelection = true
         panel.canChooseDirectories = false
         panel.canChooseFiles = true
-        panel.allowedContentTypes = [.mp3, .wav, .init(filenameExtension: "flac"), .init(filenameExtension: "m3u")].compactMap { $0 }
+        panel.allowedContentTypes = (M3UParser.supportedExtensions.sorted() + ["m3u"]).compactMap { UTType(filenameExtension: $0) }
 
         panel.begin { [weak self] response in
             guard let self, response == .OK else { return }
