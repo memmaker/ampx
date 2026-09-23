@@ -63,6 +63,62 @@ final class AmpXControlsTests: XCTestCase {
     }
 
     @MainActor
+    private func mouseDown(on slider: AmpXSlider, x: CGFloat, clickCount: Int) throws {
+        try slider.mouseDown(with: XCTUnwrap(NSEvent.mouseEvent(
+            with: .leftMouseDown,
+            location: NSPoint(x: x, y: slider.bounds.midY),
+            modifierFlags: [],
+            timestamp: 0,
+            windowNumber: 0,
+            context: nil,
+            eventNumber: 0,
+            clickCount: clickCount,
+            pressure: 1
+        )))
+        slider.mouseUp(with: NSEvent())
+    }
+
+    @MainActor
+    func testSliderSnapsToSnapValueNearIt() throws {
+        let slider = AmpXSlider(skin: ClassicModernSkin())
+        slider.frame = CGRect(x: 0, y: 0, width: 200, height: 20)
+        slider.snapValue = 0.5
+        var sent: [Double] = []
+        slider.onChange = { sent.append($0) }
+
+        // Slightly off center snaps to exactly center
+        try self.mouseDown(on: slider, x: slider.trackRect.midX + 3, clickCount: 1)
+        XCTAssertEqual(slider.value, 0.5)
+        XCTAssertEqual(sent.last, 0.5)
+
+        // Well away from center does not snap
+        try self.mouseDown(on: slider, x: slider.trackRect.minX + slider.trackRect.width * 0.2, clickCount: 1)
+        XCTAssertLessThan(slider.value, 0.4)
+    }
+
+    @MainActor
+    func testSliderDoubleClickRestoresResetValue() throws {
+        let slider = AmpXSlider(skin: ClassicModernSkin())
+        slider.frame = CGRect(x: 0, y: 0, width: 200, height: 20)
+        slider.resetValue = 0.5
+        slider.setValue(0.9, sendChange: false)
+        var sent: [Double] = []
+        slider.onChange = { sent.append($0) }
+
+        try self.mouseDown(on: slider, x: slider.trackRect.minX + 5, clickCount: 2)
+        XCTAssertEqual(slider.value, 0.5)
+        XCTAssertEqual(sent, [0.5])
+    }
+
+    @MainActor
+    func testSliderWithoutResetValueIgnoresDoubleClick() throws {
+        let slider = AmpXSlider(skin: ClassicModernSkin())
+        slider.frame = CGRect(x: 0, y: 0, width: 200, height: 20)
+        try self.mouseDown(on: slider, x: slider.trackRect.maxX - 1, clickCount: 2)
+        XCTAssertGreaterThan(slider.value, 0.9, "A double-click without resetValue still sets the value under the pointer")
+    }
+
+    @MainActor
     func testDeepAccentGlyphsBrightenOnPressedFace() {
         let skin = ClassicModernSkin()
         let button = AmpXButton(skin: skin)

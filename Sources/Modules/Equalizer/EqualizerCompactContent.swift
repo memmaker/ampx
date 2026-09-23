@@ -26,6 +26,9 @@ final class EqualizerCompactContent: AmpXCompactModuleView {
         self.balanceSlider.artwork = .compact(.balance)
         self.balanceSlider.accessibilityTitle = "Balance"
         self.balanceSlider.accessibilityRangeOverride = -100 ... 100
+        // 0.5 is center: double-click resets, dragging snaps there
+        self.balanceSlider.resetValue = 0.5
+        self.balanceSlider.snapValue = 0.5
         self.balanceSlider.accessibilityValueFormatter = {
             let balance = Int((($0 * 2 - 1) * 100).rounded())
             return balance == 0 ? "Center" : "\(balance < 0 ? "Left" : "Right") \(abs(balance))%"

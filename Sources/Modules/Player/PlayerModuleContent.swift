@@ -120,6 +120,9 @@ final class PlayerModuleContent: AmpXModuleContent {
 
         self.balanceSlider.artwork = .pill(.balance)
         self.balanceSlider.accessibilityTitle = "Balance"
+        // 0.5 is center: double-click resets, dragging snaps there
+        self.balanceSlider.resetValue = 0.5
+        self.balanceSlider.snapValue = 0.5
         self.balanceSlider.onChange = { [weak audioPlayer] value in
             audioPlayer?.setBalance(Float(value * 2 - 1))
         }

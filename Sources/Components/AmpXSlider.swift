@@ -68,6 +68,12 @@ final class AmpXSlider: AmpXControlView {
     var accessibilityRangeOverride: ClosedRange<Double>?
     var accessibilityValueFormatter: ((Double) -> Any)?
 
+    /// Value restored by a double-click (e.g. balance center); `nil` disables the gesture.
+    var resetValue: Double?
+    /// Value the thumb snaps to while dragging when within `snapTolerance` (fraction of the range).
+    var snapValue: Double?
+    var snapTolerance: Double = 0.05
+
     private var isDragging = false
 
     override func cancelInteraction() {
@@ -216,6 +222,12 @@ final class AmpXSlider: AmpXControlView {
 
     override func mouseDown(with event: NSEvent) {
         guard isEnabled else { return }
+        if event.clickCount == 2, let resetValue {
+            self.isDragging = false
+            self.setValue(resetValue, sendChange: true)
+            NSAccessibility.post(element: self, notification: .valueChanged)
+            return
+        }
         self.isDragging = true
         self.updateValue(for: convert(event.locationInWindow, from: nil))
     }
@@ -285,7 +297,10 @@ final class AmpXSlider: AmpXControlView {
     }
 
     private func updateValue(for point: CGPoint) {
-        let next = self.value(at: point)
+        var next = self.value(at: point)
+        if let snapValue, abs(next - snapValue) <= self.snapTolerance * (self.range.upperBound - self.range.lowerBound) {
+            next = snapValue
+        }
         self.value = next
         self.onChange?(next)
         NSAccessibility.post(element: self, notification: .valueChanged)
